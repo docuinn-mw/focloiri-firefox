@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "Foclóirí",
+  "version": "0.2.0",
+  "description": "Cliceáil ar fhocal Gaeilge ar shuíomh ar bith chun a shainmhíniú ó theanglann.ie a fheiceáil. Click any Irish word on any website to see its Teanglann dictionary entry in a popup.",
+  "homepage_url": "https://www.teanglann.ie/",
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
+  "permissions": [
+    "https://www.teanglann.ie/*"
+  ],
+  "browser_action": {
+    "default_icon": "icons/icon.svg",
+    "default_title": "Foclóirí — cliceáil le casadh air/as sa chluaisín seo"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "focloiri@docuinn.github.io",
+      "strict_min_version": "109.0"
+    }
+  }
+}
