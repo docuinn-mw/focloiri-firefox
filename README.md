@@ -17,6 +17,10 @@ teanglann.ie in a popup, with pronunciation audio in the three major dialects.
   buttons play the headword's pronunciation in the Connacht, Munster and
   Ulster dialects (greyed out if no recording exists). `Esc`, the `×` button,
   clicking elsewhere, or scrolling closes the popup.
+- The **Simplí** button switches the entry between the compact layout and a
+  simple, block-style layout (the same idea as teanglann.ie's *Leagan amach
+  simplí*) in which each example and numbered sense starts on its own line.
+  It is on by default and the choice is remembered across pages.
 - Inflected forms are resolved by Teanglann's own search: *bhfanacht* resolves
   to *fanacht*, *thithe* to *teach*, and so on (shown as "foirm de …"). When
   nothing matches, the popup lists Teanglann's "focail chosúla" suggestions.
@@ -29,16 +33,52 @@ For development:
 2. Click **Load Temporary Add-on…** and pick `manifest.json` in this
    directory.
 
-Temporary add-ons are removed when Firefox restarts. For a permanent install,
-sign the extension as unlisted on
-[addons.mozilla.org](https://addons.mozilla.org/developers/):
+Temporary add-ons are removed when Firefox restarts. For a personal permanent
+install, sign the extension for self-distribution:
 
 ```sh
-npx web-ext sign --channel unlisted --api-key <JWT issuer> --api-secret <JWT secret>
+web-ext sign --channel unlisted --api-key <JWT issuer> --api-secret <JWT secret>
 ```
 
 then install the resulting `.xpi` via `about:addons` → gear menu →
 **Install Add-on From File…**.
+
+## Publishing an update
+
+Foclóirí is listed on AMO with the ID `focloiri@docuinn.github.io`. To publish
+a new version:
+
+1. Bump `version` in `manifest.json`.
+2. Run `web-ext lint --source-dir .` and fix any errors.
+3. Upload the new version at
+   [addons.mozilla.org/developers/addons](https://addons.mozilla.org/developers/addons)
+   → **Foclóirí** → **New Version**. (You can also run
+   `web-ext sign --channel listed` with your API credentials; see below.)
+4. Add release notes, submit, and wait for review. The current version stays
+   live until the new one is approved.
+
+To build the upload package:
+
+```sh
+web-ext build --source-dir . --overwrite-dest
+```
+
+The `.zip` is written to `web-ext-artifacts/`. `.web-ext-config.mjs` keeps the
+old root `focloiri.zip` out of the package.
+
+For publishing from the command line, create API credentials at
+[addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/developers/addon/api/key/)
+and set them as environment variables so they don't end up in your shell
+history:
+
+```sh
+export WEB_EXT_API_KEY='<JWT issuer>'
+export WEB_EXT_API_SECRET='<JWT secret>'
+web-ext sign --channel listed --approval-timeout 0
+```
+
+`--approval-timeout 0` submits the version and exits instead of waiting for
+review; watch the Developer Hub or your email for the review result.
 
 ## How it works
 
@@ -62,6 +102,10 @@ then install the resulting `.xpi` via `about:addons` → gear menu →
   stripped, only `class`/`title`/`href` attributes are kept, and links are
   absolutised. Results are cached in memory (500 entries). All fetches carry
   an 8-second timeout.
+- The **Simplí** layout is a small local copy of teanglann.ie's
+  `blocky` styles. Teanglann implements its layout picker with a CSS class, so
+  the extension does the same rather than making extra requests; the setting
+  is persisted with `storage.local`.
 - Pronunciation recordings live at `/Can{C,M,U}/<headword>.mp3` (404 when no
   recording exists). They are fetched and played by the background page, so
   the host page's CSP cannot block them.

@@ -146,8 +146,28 @@ const POPUP_CSS = `
   }
   .head .audio button:hover:not(:disabled) { opacity: 1; }
   .head .audio button:disabled { opacity: 0.2; cursor: default; }
-  .head .close {
+  .head .layout {
     margin-left: auto;
+    cursor: pointer;
+    font: 700 10px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: inherit;
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: 9px;
+    padding: 0 6px;
+    opacity: 0.65;
+  }
+  .head .layout:hover { opacity: 1; }
+  .head .layout[aria-pressed="true"] {
+    opacity: 1;
+    color: #fffdf7;
+    background: #7a1f1f;
+    border-color: #7a1f1f;
+  }
+  @media (prefers-color-scheme: dark) {
+    .head .layout[aria-pressed="true"] { color: #26241f; background: #e8a0a0; border-color: #e8a0a0; }
+  }
+  .head .close {
     cursor: pointer;
     border: none;
     background: none;
@@ -189,12 +209,52 @@ const POPUP_CSS = `
   .clickable:hover { text-decoration: underline; }
   ul.sugg { margin: 4px 0 0; padding-left: 18px; }
   ul.sugg li { margin: 2px 0; }
+
+  /* "Leagan amach simplí" — the same idea as teanglann.ie's blocky layout:
+     each example and numbered sense starts on its own line, which is much
+     easier to scan in a narrow popup. */
+  .box.blocky .example {
+    display: block;
+    margin: 4px 0 4px 10px;
+    padding: 4px 6px;
+    background: #f4f0e5;
+    border-left: 3px solid #ddd5c2;
+  }
+  .box.blocky .entry > .sensenum::before {
+    content: "";
+    display: block;
+    margin-top: 0.6em;
+    margin-bottom: 2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .box.blocky .example { background: #2f2c25; border-left-color: #55503f; }
+  }
 `;
 
 let popupHost = null;
 let popupShadow = null;
 let popupHeadword = '';
 let lookupSeq = 0;
+
+/* "Leagan amach simplí", on by default — teanglann.ie's own blocky layout.
+   The preference is remembered across pages with storage.local. */
+let simpleLayout = true;
+browser.storage.local.get('simpleLayout').then(
+  (r) => {
+    if (r && typeof r.simpleLayout === 'boolean') {
+      simpleLayout = r.simpleLayout;
+      if (popupShadow) applySimpleLayout(popupShadow.querySelector('.box'));
+    }
+  },
+  () => {}
+);
+
+function applySimpleLayout(box) {
+  if (!box) return;
+  box.classList.toggle('blocky', simpleLayout);
+  const button = box.querySelector('.head .layout');
+  if (button) button.setAttribute('aria-pressed', String(simpleLayout));
+}
 
 /* The popup is position:fixed, so scrolling would leave it hanging over the
    wrong text — close it instead (scrolling *inside* the popup is fine). */
@@ -238,7 +298,8 @@ function openPopup(x, y) {
         <button data-dialect="M" title="Canúint na Mumhan">M</button>
         <button data-dialect="U" title="Canúint Uladh">U</button>
       </span>
-      <button class="close" title="Dún">×</button>
+      <button class="layout" type="button" title="Leagan amach simplí" aria-pressed="true">Simplí</button>
+      <button class="close" type="button" title="Dún">×</button>
     </div>
     <div class="body"><span class="status">Ag cuardach…</span></div>
     <div class="foot">
@@ -246,9 +307,18 @@ function openPopup(x, y) {
       <a class="src" href="https://www.teanglann.ie/" target="_blank" rel="noopener noreferrer">teanglann.ie »</a>
     </div>`;
   popupShadow.appendChild(box);
+  applySimpleLayout(box);
 
   box.querySelector('.close').addEventListener('click', closePopup);
   box.addEventListener('click', (event) => {
+    /* Layout toggle — "Leagan amach simplí" (blocky entry layout). */
+    if (event.target.closest('.head .layout')) {
+      simpleLayout = !simpleLayout;
+      applySimpleLayout(box);
+      browser.storage.local.set({ simpleLayout }).catch(() => {});
+      return;
+    }
+
     /* Pronunciation buttons — audio is played by the background page. */
     const canButton = event.target.closest('.audio button');
     if (canButton) {

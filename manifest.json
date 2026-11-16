@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Foclóirí",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Cliceáil ar fhocal Gaeilge ar shuíomh ar bith chun a shainmhíniú ó theanglann.ie a fheiceáil. Click any Irish word on any website to see its Teanglann dictionary entry in a popup.",
   "homepage_url": "https://www.teanglann.ie/",
   "icons": {
@@ -9,7 +9,8 @@
     "96": "icons/icon.svg"
   },
   "permissions": [
-    "https://www.teanglann.ie/*"
+    "https://www.teanglann.ie/*",
+    "storage"
   ],
   "browser_action": {
     "default_icon": "icons/icon.svg",
@@ -29,7 +30,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "focloiri@docuinn.github.io",
-      "strict_min_version": "109.0"
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   }
 }
