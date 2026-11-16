@@ -33,52 +33,8 @@ For development:
 2. Click **Load Temporary Add-on…** and pick `manifest.json` in this
    directory.
 
-Temporary add-ons are removed when Firefox restarts. For a personal permanent
-install, sign the extension for self-distribution:
-
-```sh
-web-ext sign --channel unlisted --api-key <JWT issuer> --api-secret <JWT secret>
-```
-
-then install the resulting `.xpi` via `about:addons` → gear menu →
-**Install Add-on From File…**.
-
-## Publishing an update
-
-Foclóirí is listed on AMO with the ID `focloiri@docuinn.github.io`. To publish
-a new version:
-
-1. Bump `version` in `manifest.json`.
-2. Run `web-ext lint --source-dir .` and fix any errors.
-3. Upload the new version at
-   [addons.mozilla.org/developers/addons](https://addons.mozilla.org/developers/addons)
-   → **Foclóirí** → **New Version**. (You can also run
-   `web-ext sign --channel listed` with your API credentials; see below.)
-4. Add release notes, submit, and wait for review. The current version stays
-   live until the new one is approved.
-
-To build the upload package:
-
-```sh
-web-ext build --source-dir . --overwrite-dest
-```
-
-The `.zip` is written to `web-ext-artifacts/`. `.web-ext-config.mjs` keeps the
-old root `focloiri.zip` out of the package.
-
-For publishing from the command line, create API credentials at
-[addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/developers/addon/api/key/)
-and set them as environment variables so they don't end up in your shell
-history:
-
-```sh
-export WEB_EXT_API_KEY='<JWT issuer>'
-export WEB_EXT_API_SECRET='<JWT secret>'
-web-ext sign --channel listed --approval-timeout 0
-```
-
-`--approval-timeout 0` submits the version and exits instead of waiting for
-review; watch the Developer Hub or your email for the review result.
+Temporary add-ons are removed when Firefox restarts. For a permanent install,
+use the [Foclóirí listing on addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/focl%C3%B3ir%C3%AD/).
 
 ## How it works
 

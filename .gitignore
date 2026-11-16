@@ -4,3 +4,6 @@ node_modules/
 
 # Old packaged build; rebuild with web-ext build instead.
 /focloiri.zip
+
+# Maintainer-only release instructions.
+/PUBLISHING.local.md
